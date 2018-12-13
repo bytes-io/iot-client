@@ -2,12 +2,10 @@ const Tesserarius = require("tesserarius");
 
 const tesserarius = new Tesserarius();
 
-
-exports.allowForwarding = function(){
-  tesserarius.set_policy("FORWARD", "ACCEPT", (err) => {});
-
+exports.allowForwarding = function (cb) {
+  tesserarius.set_policy("FORWARD", "ACCEPT", cb);
 }
 
-exports.blockForwarding = function(){
-  tessrarius.set_policy("FORWARD", "DROP", (err) => {});
+exports.blockForwarding = function (cb) {
+  tessrarius.set_policy("FORWARD", "DROP", cb);
 }

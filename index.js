@@ -19,11 +19,22 @@ app.get('/buy', async (req, res) => {
 })
 
 
-// Seller
+app.get('/start-selling', async (req,res) => {
+  iptablesService.allowForwarding((err) => {
+    if (err) {
+      res.sendStatus(500)
+    }
+    res.sendStatus(200)
+  })
+})
 
-app.get('/startselling', async (req,res) => {
-  
-
+app.get('/stop-selling', async (req,res) => {
+  iptablesService.blockForwarding((err) => {
+    if (err) {
+      res.sendStatus(500)
+    }
+    res.sendStatus(200)
+  })
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
