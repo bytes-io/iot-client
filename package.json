@@ -13,6 +13,7 @@
     "bluebird": "^3.5.3",
     "express": "^4.16.4",
     "network": "^0.4.1",
+    "tesserarius": "^0.3.2",
     "wifi-control": "^2.0.1"
   },
   "devDependencies": {
