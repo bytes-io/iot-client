@@ -33,10 +33,14 @@ exports.connect = async function connect(iface, ssid, password) {
     throw new Error(response.msg)
   }
 
-  const interface = await getActiveInterface()
+  const interface = await this.getInterfaceInfo()
   console.log('Gatway IP ', interface.gateway_ip)
-  
+
   return interface
+}
+
+exports.getInterfaceInfo = function getInterfaceInfo() {
+  return getInterfaceInfo()
 }
 
 const connectToAP = function (ssid, password) {

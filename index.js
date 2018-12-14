@@ -23,17 +23,17 @@ app.use(function (err, req, res, next) {
 })
 
 app.get('/bytes-networks', async (req, res) => {
-  let networks;
-  try {
-    networks = await wifiService.getNetworks();
-  } catch (err) {
-    throw new Error(err)
-  }
+  const networks = await wifiService.getNetworks();
 
   const bytesAps = networks.filter(n => /bytes-.+/g.test(n.ssid))
   console.log('Found Bytes networs: ', bytesAps)
 
   res.send(bytesAps)
+})
+
+app.get('/device-info', async (req, res) => {
+  const interface = await wifiService.getInterfaceInfo();
+  res.send(interface)
 })
 
 app.get('/buy', async (req, res) => {
@@ -48,7 +48,7 @@ app.get('/buy', async (req, res) => {
 app.get('/give-access', async (req,res) => {
   iptablesService.allowForwarding((err) => {
     if (err) {
-      res.sendStatus(500)
+      throw new Error(err)
     }
     res.sendStatus(200)
   })
@@ -57,7 +57,7 @@ app.get('/give-access', async (req,res) => {
 app.get('/deny-access', async (req,res) => {
   iptablesService.blockForwarding((err) => {
     if (err) {
-      res.sendStatus(500)
+      throw new Error(err)
     }
     res.sendStatus(200)
   })
