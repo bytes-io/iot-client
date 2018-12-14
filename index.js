@@ -59,4 +59,31 @@ app.get('/deny-access', async (req,res) => {
   })
 })
 
+const server = require('http').createServer()
+const io = require('socket.io')(server)
+
+app.get('/start-selling', async (req,res) => {
+  io.on('connection', function (client) {
+    console.log('client connected...', client.handshake.address)
+    client.on('disconnect', function () {
+      console.log('client disconnect...', client.id)
+    })
+    // send price parameter
+    client.emit('message', "789");
+    client.on('error', function (err) {
+      console.log('received error from client:', client.id)
+      console.log(err)
+    })
+  })
+  server.listen(3000, function (err) {
+    if (err) throw err
+    console.log('listening on port 3000')
+  })
+})
+
+app.get('/stop-selling', async (req,res) => {
+  io.close();
+})
+
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
