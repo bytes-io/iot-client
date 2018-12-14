@@ -63,24 +63,29 @@ app.get('/deny-access', async (req,res) => {
   })
 })
 
+let state = 'stop-selling'
 app.get('/start-selling', async (req,res) => {
-  io.on('connection', function (client) {
-    console.log('client connected...', client.handshake.address)
-    client.on('disconnect', function () {
-      console.log('client disconnect...', client.id)
-    })
-    // send price parameter
-    client.emit('message', "789");
-    client.on('error', function (err) {
-      console.log('received error from client:', client.id)
-      console.log(err)
-    })
-  })
+  state = 'start-selling'
 })
 
 app.get('/stop-selling', async (req,res) => {
+  state = 'stop-selling'
   io.close();
 })
 
+io.on('connection', function (client) {
+  if (state === 'start-selling') {
+    // send price parameter
+    client.emit('message', "789");
+  }
+  console.log('client connected...', client.handshake.address)
+  client.on('disconnect', function () {
+    console.log('client disconnect...', client.id)
+  })
+  client.on('error', function (err) {
+    console.log('received error from client:', client.id)
+    console.log(err)
+  })
+})
 
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
