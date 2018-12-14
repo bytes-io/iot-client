@@ -7,5 +7,5 @@ exports.allowForwarding = function (cb) {
 }
 
 exports.blockForwarding = function (cb) {
-  tessrarius.set_policy("FORWARD", "DROP", cb);
+  tesserarius.set_policy("FORWARD", "DROP", cb);
 }
