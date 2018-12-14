@@ -40,7 +40,7 @@ exports.connect = async function connect(iface, ssid, password) {
 }
 
 exports.getInterfaceInfo = function getInterfaceInfo() {
-  return getInterfaceInfo()
+  return getActiveInterface()
 }
 
 const connectToAP = function (ssid, password) {
