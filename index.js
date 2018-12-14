@@ -52,37 +52,29 @@ app.get('/buy', async (req, res) => {
   res.send({state})
 })
 
+app.get('/device-state', async (req,res) => {
+  res.send({state})
+})
 
-app.get('/give-access', async (req,res) => {
+app.get('/start-selling', async (req,res) => {
   iptablesService.allowForwarding((err) => {
     if (err) {
       throw new Error(err)
     }
-    res.sendStatus(200)
   })
+  state = 'sell'
+  res.send({state})
 })
 
-app.get('/deny-access', async (req,res) => {
+app.get('/stop-selling', async (req,res) => {
   iptablesService.blockForwarding((err) => {
     if (err) {
       throw new Error(err)
     }
     res.sendStatus(200)
   })
-})
-
-app.get('/device-state', async (req,res) => {
-  res.send({state})
-})
-
-app.get('/start-selling', async (req,res) => {
-  state = 'sell'
-  res.send({state})
-})
-
-app.get('/stop-selling', async (req,res) => {
   state = 'idle'
-  io.close();
+  // io.close(); // Todo:use disconnect
 
   res.send({state})
 })
