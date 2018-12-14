@@ -9,7 +9,8 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIo(server)
 
-const port = 3000
+const port = process.env.PORT || 3000
+let state = 'idle'
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -38,10 +39,11 @@ app.get('/device-info', async (req, res) => {
 
 app.get('/buy', async (req, res) => {
   // const bytesAps = await wifiService.getNetworks();
-  // const interface = await wifiService.connect(null, bytesAps[0].ssid, '12346789');
-  // res.send(interface)
+  // const gatewayIp = await wifiService.connect(null, bytesAps[0].ssid, '12346789');
+  // res.send({gatewayIp})
 
-
+  state = 'buy'
+  res.send({state})
 })
 
 
@@ -63,14 +65,20 @@ app.get('/deny-access', async (req,res) => {
   })
 })
 
-let state = 'stop-selling'
+app.get('/device-state', async (req,res) => {
+  res.send({state})
+})
+
 app.get('/start-selling', async (req,res) => {
-  state = 'start-selling'
+  state = 'selling'
+  res.send({state})
 })
 
 app.get('/stop-selling', async (req,res) => {
-  state = 'stop-selling'
+  state = 'idle'
   io.close();
+
+  res.send({state})
 })
 
 io.on('connection', function (client) {

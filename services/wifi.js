@@ -36,7 +36,7 @@ exports.connect = async function connect(iface, ssid, password) {
   const interface = await this.getInterfaceInfo()
   console.log('Gatway IP ', interface.gateway_ip)
 
-  return interface
+  return interface.gateway_ip
 }
 
 exports.getInterfaceInfo = function getInterfaceInfo() {
