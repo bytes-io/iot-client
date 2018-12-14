@@ -1,10 +1,14 @@
 const express = require('express')
-
+const http = require('http')
+const socketIo = require('socket.io')
 
 const wifiService = require('./services/wifi')
 const iptablesService = require('./services/iptables')
 
 const app = express()
+const server = http.createServer(app)
+const io = socketIo(server)
+
 const port = 3000
 
 // error handler
@@ -59,9 +63,6 @@ app.get('/deny-access', async (req,res) => {
   })
 })
 
-const server = require('http').createServer()
-const io = require('socket.io')(server)
-
 app.get('/start-selling', async (req,res) => {
   io.on('connection', function (client) {
     console.log('client connected...', client.handshake.address)
@@ -75,10 +76,6 @@ app.get('/start-selling', async (req,res) => {
       console.log(err)
     })
   })
-  server.listen(3000, function (err) {
-    if (err) throw err
-    console.log('listening on port 3000')
-  })
 })
 
 app.get('/stop-selling', async (req,res) => {
@@ -86,4 +83,4 @@ app.get('/stop-selling', async (req,res) => {
 })
 
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
