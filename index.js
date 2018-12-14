@@ -76,7 +76,7 @@ app.get('/device-state', async (req,res) => {
 })
 
 app.get('/start-selling', async (req,res) => {
-  state = 'selling'
+  state = 'sell'
   res.send({state})
 })
 
