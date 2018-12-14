@@ -3,35 +3,31 @@ const network = require('network')
 const Bluebird = require('bluebird')
 
 const scanForWiFi = Bluebird.promisify(WiFiControl.scanForWiFi)
-const connectToAP = Bluebird.promisify(WiFiControl.connectToAP)
 const getActiveInterface = Bluebird.promisify(network.get_active_interface)
 
+const options = {
+  debug: true,
+  connectionTimeout: 10000
+}
+WiFiControl.init(options)
+
 exports.getNetworks = async function getNetworks(iface) {
-  const options = {
-    debug: true,
-    connectionTimeout: 10000
-  }
   if(iface) {
-    options.iface = iface
+    WiFiControl.configure(Object.assign(options, { iface }))
   }
 
-  WiFiControl.init(options)
   const response = await scanForWiFi()
-
-  const bytesAps = response.networks.filter(n => /bytes-.+/g.test(n.ssid))
-  if(bytesAps.length < 1) {
-    console.log('No Bytes aps found, exiting ..')
-    return
-  }
-
-  console.log('Found Bytes networs: ', bytesAps)
-  return bytesAps;
+  return response.networks
 }
 
-exports.connect = async function connect(ssid, password) {
+exports.connect = async function connect(iface, ssid, password) {
+  if(iface) {
+    WiFiControl.configure(Object.assign(options, { iface }))
+  }
 
-  console.log("connecting to: ", ssid)
-  const response = await connectToAP({ssid, password})
+  const response = await connectToAP(ssid, password)
+  console.log(response)
+
   //check if connected
   if(!response.success) {
     throw new Error(response.msg)
@@ -41,4 +37,17 @@ exports.connect = async function connect(ssid, password) {
   console.log('Gatway IP ', interface.gateway_ip)
   
   return interface
+}
+
+const connectToAP = function (ssid, password) {
+  console.log("connecting to: ", ssid)
+
+  return new Promise(function(resolve, reject) {
+    WiFiControl.connectToAP({ssid, password}, (err, response) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(response);
+    })
+  })
 }

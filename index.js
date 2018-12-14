@@ -19,18 +19,29 @@ app.use(function (err, req, res, next) {
 })
 
 app.get('/bytes-networks', async (req, res) => {
-  const bytesAps = await wifiService.getNetworks();
+  let networks;
+  try {
+    networks = await wifiService.getNetworks();
+  } catch (err) {
+    throw new Error(err)
+  }
+
+  const bytesAps = networks.filter(n => /bytes-.+/g.test(n.ssid))
+  console.log('Found Bytes networs: ', bytesAps)
+
   res.send(bytesAps)
 })
 
 app.get('/buy', async (req, res) => {
-  const bytesAps = await wifiService.getNetworks();
-  const interface = await wifiService.connect(bytesAps[0]);
-  res.send(interface)
+  // const bytesAps = await wifiService.getNetworks();
+  // const interface = await wifiService.connect(null, bytesAps[0].ssid, '12346789');
+  // res.send(interface)
+
+
 })
 
 
-app.get('/start-selling', async (req,res) => {
+app.get('/give-access', async (req,res) => {
   iptablesService.allowForwarding((err) => {
     if (err) {
       res.sendStatus(500)
@@ -39,7 +50,7 @@ app.get('/start-selling', async (req,res) => {
   })
 })
 
-app.get('/stop-selling', async (req,res) => {
+app.get('/deny-access', async (req,res) => {
   iptablesService.blockForwarding((err) => {
     if (err) {
       res.sendStatus(500)
