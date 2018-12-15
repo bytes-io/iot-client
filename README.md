@@ -8,7 +8,7 @@ See ```services/proof-of-work.js``` for complete details.
 ### Bootstrap a new IoT device
 
 ```
-git clone https://github.com:bytes-io/iot-client.git
+git clone https://github.com/bytes-io/iot-client.git
 cd iot-client
 sh ./create-iota-seed.sh
 npm install
