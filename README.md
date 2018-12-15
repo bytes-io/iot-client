@@ -2,6 +2,9 @@
 
 A simple IoT client service.
 
+To reduce the load the Proof Of Work is deligated to a trusted node.
+See ```services/proof-of-work.js``` for complete details.
+
 ### Bootstrap a new IoT device
 
 ```
@@ -13,8 +16,7 @@ npm start
 ```
 
 
-
-Future developments:
+**Future developments:**
 
 - Dockarize the client
 - Auto detection and generation of IOTA wallet
