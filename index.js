@@ -1,6 +1,7 @@
 const express = require('express')
-const http = require('http')
 const socketIo = require('socket.io')
+const http = require('http')
+const cors = require('cors')
 
 const wifiService = require('./services/wifi')
 const iptablesService = require('./services/iptables')
@@ -9,14 +10,9 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIo(server)
 
-const port = process.env.PORT || 3000
 let state = 'idle'
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+app.use(cors())
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -94,4 +90,5 @@ io.on('connection', function (client) {
   })
 })
 
+const port = process.env.PORT || 3000
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
