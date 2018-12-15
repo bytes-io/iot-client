@@ -34,6 +34,8 @@ exports.makeTx = async function makeTx(toAddress, amountInI, deviceInfo = {}) {
   const trytes = await iota.prepareTransfers(seed, transfers)
   const bundle = await iota.sendTrytes(trytes, depth, minWeightMagnitude)
   console.log(`Published transaction with tail hash: ${bundle[0].hash}`)
-  console.log('Bundle:', bundle)
+  // console.log('Bundle:', bundle)
   console.log('\n', `see it here https://thetangle.org/transaction/${bundle[0].hash}`, '\n')
+
+  return bundle[0].hash
 }
