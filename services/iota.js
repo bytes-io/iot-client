@@ -27,7 +27,6 @@ exports.makeTx = async function makeTx(toAddress, amountInI, deviceInfo = {}) {
   }]
 
   // bundle prep for all transfers
-  console.log({seed})
   const trytes = await iota.prepareTransfers(seed, transfers)
   const bundle = await iota.sendTrytes(trytes, depth, minWeightMagnitude)
   console.log(`Published transaction with tail hash: ${bundle[0].hash}`)
@@ -47,9 +46,3 @@ function loadSeed() {
     console.log('Loaded IOTA seed')
   });
 }
-
-setTimeout(() => {
-  this.makeTx('IETGETEQSAAJUCCKDVBBGPUNQVUFNTHNMZYUCXXBFXYOOOQOHC9PTMP9RRIMIOQRDPATHPVQXBRXIKFDDRDPQDBWTY', 0)
-}, 1000)
-
-
