@@ -5,6 +5,7 @@ const cors = require('cors')
 
 const wifiService = require('./services/wifi')
 const iptablesService = require('./services/iptables')
+const iotaService = require('./services/iota')
 
 const app = express()
 const server = http.createServer(app)
