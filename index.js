@@ -76,6 +76,11 @@ app.get('/stop-selling', async (req,res) => {
   res.send({state})
 })
 
+app.get('/wallet/data', async (req,res) => {
+  const accountData = await iotaService.getAccountData()
+  res.send({accountData})
+})
+
 io.on('connection', function (client) {
   if (state === 'start-selling') {
     // send price parameter

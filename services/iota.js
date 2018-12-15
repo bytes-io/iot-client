@@ -2,17 +2,19 @@ const { composeAPI } = require('@iota/core')
 const { asciiToTrytes } = require('@iota/converter')
 const fs = require('fs')
 
-const {attachToTangle} = require('./proof-of-work')
+const { attachToTangle } = require('./proof-of-work')
 
 const minWeightMagnitude = 14
+const security = 2
 const depth = 3
+
+let seed;
+loadSeed();
+
 const iota = composeAPI({
   provider: 'https://nodes.thetangle.org:443',
   attachToTangle
 })
-
-let seed;
-loadSeed();
 
 exports.getCurrentAddress = function getCurrentAddress() {
   return iota.getNewAddress(seed)
@@ -34,6 +36,13 @@ exports.makeTx = async function makeTx(toAddress, amountInI, deviceInfo = {}) {
   console.log(`Explorer link https://thetangle.org/transaction/${bundle[0].hash}`, '\n')
 
   return bundle[0].hash
+}
+
+exports.getAccountData = function getAccountData() {
+  return getAccountData(seed, {
+    start: 0,
+    security
+  })
 }
 
 function loadSeed() {

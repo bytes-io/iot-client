@@ -1,26 +1,22 @@
-exports.attachToTangle = async function(
+exports.attachToTangle = async function(trunkTransaction, branchTransaction, minWeightMagnitude, trytes, cb) {
+  apiKey = null
+  timeoutMs = 5000
+
+  let resp = await powsrvATT(
     trunkTransaction,
     branchTransaction,
     minWeightMagnitude,
-    trytes
-  ) {
-    apiKey = null
-    timeoutMs = 5000
+    trytes,
+    apiKey,
+    timeoutMs
+  );
 
-    let resp = await powsrvATT(
-        trunkTransaction,
-        branchTransaction,
-        minWeightMagnitude,
-        trytes,
-        apiKey,
-        timeoutMs
-    );
-
-    if ((resp[0]) != null) {
-      return resp[0]
-    } else {
-      return resp[1].trytes
-    }
+  console.log(resp)
+  if ((resp[0]) != null) {
+    return resp[0]
+  } else {
+    return resp[1].trytes
+  }
 }
 
 
