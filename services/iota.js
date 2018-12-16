@@ -38,17 +38,11 @@ exports.makeTx = async function makeTx(toAddress, amountInI, deviceInfo = {}) {
   return bundle[0].hash
 }
 
-exports.getAccountData = async function getAccountData() {
-  const response = await iota.getAccountData(seed, {
+exports.getAccountData = function getAccountData() {
+  return iota.getAccountData(seed, {
     start: 0,
     security
   })
-
-  if(response && response.accountData) {
-    return response.accountData
-  } else {
-    {}
-  }
 }
 
 function loadSeed() {
