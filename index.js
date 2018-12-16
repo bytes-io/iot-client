@@ -2,6 +2,7 @@ const express = require('express')
 const socketIo = require('socket.io')
 const http = require('http')
 const cors = require('cors')
+const ioClient = require('socket.io-client');
 
 const wifiService = require('./services/wifi')
 const iptablesService = require('./services/iptables')
@@ -12,6 +13,10 @@ const server = http.createServer(app)
 const io = socketIo(server)
 
 let state = 'idle'
+let paymentInfo = {
+  toAddress: null,
+  price: null
+}
 
 app.use(cors())
 
@@ -46,6 +51,7 @@ app.get('/buy', async (req, res) => {
   // res.send({gatewayIp})
 
   state = 'buy'
+  console.log('Ready to buy access')
   res.send({state})
 })
 
@@ -60,6 +66,14 @@ app.get('/start-selling', async (req,res) => {
     }
   })
   state = 'sell'
+
+  const socketClient = ioClient('http://localhost:3001');
+  const address = await iotaService.getCurrentAddress()
+  socketClient.emit('payment-info', {
+    toAddress: address,
+    price: 1
+  });
+
   res.send({state})
 })
 
@@ -71,7 +85,12 @@ app.get('/stop-selling', async (req,res) => {
     res.sendStatus(200)
   })
   state = 'idle'
+
   // io.close(); // Todo:use disconnect
+  paymentInfo = {
+    toAddress: null,
+    price: null
+  }
 
   res.send({state})
 })
@@ -82,19 +101,42 @@ app.get('/wallet/data', async (req,res) => {
 })
 
 io.on('connection', function (client) {
-  if (state === 'start-selling') {
-    // send price parameter
-    client.emit('message', "789");
-  }
   console.log('client connected...', client.handshake.address)
+
+  let payIntervalId = null;
+  client.on('payment-info', function (data) {
+    if (state !== 'buy') {
+      console.log('Ignoring payment info data, Invalid state', state)
+      return
+    }
+    console.log('Received payment info', data)
+    paymentInfo.toAddress = data.toAddress
+    paymentInfo.price = data.price
+
+    payIntervalId = setInterval(async function() {
+      console.log('Initializing payment');
+      await iotaService.makeTx(paymentInfo.toAddress, 0)
+    }, 1 * 10 * 1000);
+  })
+
   client.on('disconnect', function () {
     console.log('client disconnect...', client.id)
+
+    payIntervalId && clearInterval(payIntervalId);
+    payIntervalId = null
   })
+  
   client.on('error', function (err) {
     console.log('received error from client:', client.id)
     console.log(err)
+
+    payIntervalId && clearInterval(payIntervalId);
+    payIntervalId = null
   })
 })
+
+
+
 
 const port = process.env.PORT || 3000
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
