@@ -17,6 +17,8 @@ let paymentInfo = {
   toAddress: null,
   price: null
 }
+let askPrice = 3
+let bidPrice = 3
 
 app.use(cors())
 
@@ -59,6 +61,12 @@ app.get('/device-state', async (req,res) => {
   res.send({state})
 })
 
+app.get('/set-price/:price', async (req,res) => {
+  askPrice = req.params.price
+  console.log("Set ask price to", askPrice)
+  res.sendStatus(200)
+})
+
 app.get('/start-selling', async (req,res) => {
   iptablesService.allowForwarding((err) => {
     if (err) {
@@ -71,7 +79,7 @@ app.get('/start-selling', async (req,res) => {
   const address = await iotaService.getCurrentAddress()
   socketClient.emit('payment-info', {
     toAddress: address,
-    price: 1
+    price: askPrice
   });
 
   res.send({state})
