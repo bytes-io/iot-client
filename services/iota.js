@@ -1,6 +1,7 @@
 const { composeAPI } = require('@iota/core')
 const { asciiToTrytes } = require('@iota/converter')
 const fs = require('fs')
+const cache = require('memory-cache');
 
 const { attachToTangle } = require('./proof-of-work')
 
@@ -38,11 +39,21 @@ exports.makeTx = async function makeTx(toAddress, amountInI, deviceInfo = {}) {
   return bundle[0].hash
 }
 
-exports.getAccountData = function getAccountData() {
-  return iota.getAccountData(seed, {
+exports.getAccountData = async function getAccountData() {
+  const p = iota.getAccountData(seed, {
     start: 0,
     security
+  }).then((accountInfo) => {
+    cache.put('accountInfo', accountInfo, Number(process.env.CACHE_TIMEOUT || 100));
+    return accountInfo
   })
+  const cachedInfo = cache.get('accountInfo')
+  if (cachedInfo) {
+    return cachedInfo
+  } else {
+    return p
+  }
+
 }
 
 function loadSeed() {

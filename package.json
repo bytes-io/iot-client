@@ -15,6 +15,7 @@
     "bluebird": "^3.5.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "memory-cache": "^0.2.0",
     "network": "^0.4.1",
     "socket.io": "^2.2.0",
     "tesserarius": "^0.3.2",
