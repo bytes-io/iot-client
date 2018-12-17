@@ -53,11 +53,10 @@ app.get('/buy', async (req, res) => {
   // res.send({gatewayIp})
 
   const ifaces = await wifiService.getAllInterfaces()
-  const iface = ifaces.filter(i => i.name === 'wlan1')
+  const iface = ifaces.find(i => i.name === 'wlan1')
 
   console.log('Connecting to iface.ip_address', iface.ip_address)
   const socketClient = ioClient(`http://${iface.ip_address}:3000`);
-  const address = await iotaService.getCurrentAddress()
   socketClient.emit('get-payment-info')
   // socketClient.emit('payment-info', {
   //   toAddress: address,
@@ -80,6 +79,7 @@ app.get('/set-price/:price', async (req,res) => {
 })
 
 app.get('/start-selling', async (req,res) => {
+  console.log('Device is in selling mode')
   iptablesService.allowForwarding((err) => {
     if (err) {
       throw new Error(err)
@@ -116,8 +116,9 @@ app.get('/wallet/data', async (req,res) => {
 io.on('connection', function (client) {
   console.log('client connected...', client.handshake.address)
 
-  client.on('get-payment-info', function (data) {
+  client.on('get-payment-info', async function (data) {
     console.log('get-payment-info RECEIVED')
+    const address = await iotaService.getCurrentAddress()
     client.emit('payment-info', {
       toAddress: address,
       price: askPrice
