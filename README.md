@@ -5,7 +5,7 @@ A simple IoT client service.
 To reduce the load the Proof Of Work is deligated to a trusted node.
 See ```services/proof-of-work.js``` for complete details.
 
-### Bootstrap a new IoT device
+** Bootstrap a new IoT device**
 
 ```
 git clone https://github.com/bytes-io/iot-client.git
