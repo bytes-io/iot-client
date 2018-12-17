@@ -25,6 +25,7 @@ app.use(cors())
 // error handler
 app.use(function (err, req, res, next) {
   function errorHandler (err, req, res, next) {
+    console.log('global', err)
     if (res.headersSent) {
       return next(err)
     }
@@ -54,7 +55,7 @@ app.get('/buy', async (req, res) => {
 
   const ifaces = await wifiService.getAllInterfaces()
   const iface = ifaces.find(i => i.name === 'wlan1')
-  createSocketClient(iface.ip_address)
+  createSocketClient(iface.gateway_ip)
   socketClient.emit('get-payment-info')
 
   state = 'buy'
