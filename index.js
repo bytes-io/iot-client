@@ -89,7 +89,6 @@ app.get('/stop-selling', async (req,res) => {
     if (err) {
       throw new Error(err)
     }
-    res.sendStatus(200)
   })
   state = 'idle'
 
