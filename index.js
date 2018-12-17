@@ -25,6 +25,7 @@ app.use(cors())
 // error handler
 app.use(function (err, req, res, next) {
   function errorHandler (err, req, res, next) {
+    console.log('global', err)
     if (res.headersSent) {
       return next(err)
     }
@@ -52,6 +53,11 @@ app.get('/buy', async (req, res) => {
   // const gatewayIp = await wifiService.connect(null, bytesAps[0].ssid, '12346789');
   // res.send({gatewayIp})
 
+  const ifaces = await wifiService.getAllInterfaces()
+  const iface = ifaces.find(i => i.name === 'wlan1')
+  createSocketClient(iface.gateway_ip)
+  socketClient.emit('get-payment-info')
+
   state = 'buy'
   console.log('Ready to buy access')
   res.send({state})
@@ -68,19 +74,13 @@ app.get('/set-price/:price', async (req,res) => {
 })
 
 app.get('/start-selling', async (req,res) => {
+  console.log('Device is in selling mode')
   iptablesService.allowForwarding((err) => {
     if (err) {
       throw new Error(err)
     }
   })
   state = 'sell'
-
-  const socketClient = ioClient('http://192.168.4.11:3000');
-  const address = await iotaService.getCurrentAddress()
-  socketClient.emit('payment-info', {
-    toAddress: address,
-    price: askPrice
-  });
 
   res.send({state})
 })
@@ -90,7 +90,6 @@ app.get('/stop-selling', async (req,res) => {
     if (err) {
       throw new Error(err)
     }
-    res.sendStatus(200)
   })
   state = 'idle'
 
@@ -108,11 +107,14 @@ app.get('/wallet/data', async (req,res) => {
   res.send({accountData})
 })
 
-io.on('connection', function (client) {
-  console.log('client connected...', client.handshake.address)
+let payIntervalId = null;
+let socketClient = null
+function createSocketClient(ip) {
+  console.log('Connecting to websocket', ip)
+  socketClient = ioClient(`http://${ip}:3000`);
 
-  let payIntervalId = null;
-  client.on('payment-info', function (data) {
+  socketClient.on('payment-info', function (data) {
+    console.log('payment-info RECEIVED')
     if (state !== 'buy') {
       console.log('Ignoring payment info data, Invalid state', state)
       return
@@ -127,24 +129,46 @@ io.on('connection', function (client) {
     }, 1 * 10 * 1000);
   })
 
-  client.on('disconnect', function () {
-    console.log('client disconnect...', client.id)
+  socketClient.on('disconnect', function () {
+    console.log('ws client disconnected')
 
     payIntervalId && clearInterval(payIntervalId);
     payIntervalId = null
+    socketClient = null
+  })
+  
+  socketClient.on('error', function (err) {
+    console.log('Socket connection error:', err)
+
+    payIntervalId && clearInterval(payIntervalId);
+    payIntervalId = null
+    socketClient = null
+  })
+
+  return socketClient
+}
+
+io.on('connection', function (client) {
+  console.log('client connected...', client.handshake.address)
+
+  client.on('get-payment-info', async function (data) {
+    console.log('get-payment-info RECEIVED')
+    const address = await iotaService.getCurrentAddress()
+    client.emit('payment-info', {
+      toAddress: address,
+      price: askPrice
+    });
+  })
+
+  client.on('disconnect', function () {
+    console.log('client disconnect...', client.id)
   })
   
   client.on('error', function (err) {
     console.log('received error from client:', client.id)
     console.log(err)
-
-    payIntervalId && clearInterval(payIntervalId);
-    payIntervalId = null
   })
 })
-
-
-
 
 const port = process.env.PORT || 3000
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))

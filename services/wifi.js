@@ -4,6 +4,7 @@ const Bluebird = require('bluebird')
 
 const scanForWiFi = Bluebird.promisify(WiFiControl.scanForWiFi)
 const getActiveInterface = Bluebird.promisify(network.get_active_interface)
+const getInterfaceList = Bluebird.promisify(network.get_interfaces_list)
 
 const options = {
   debug: true,
@@ -41,6 +42,10 @@ exports.connect = async function connect(iface, ssid, password) {
 
 exports.getInterfaceInfo = function getInterfaceInfo() {
   return getActiveInterface()
+}
+
+exports.getAllInterfaces = function getInterfaceInfo() {
+  return getInterfaceList()
 }
 
 const connectToAP = function (ssid, password) {
