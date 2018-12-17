@@ -130,7 +130,7 @@ function createSocketClient(ip) {
   })
 
   socketClient.on('disconnect', function () {
-    console.log('client disconnect...', client.id)
+    console.log('ws client disconnected')
 
     payIntervalId && clearInterval(payIntervalId);
     payIntervalId = null
@@ -138,8 +138,7 @@ function createSocketClient(ip) {
   })
   
   socketClient.on('error', function (err) {
-    console.log('received error from client:', client.id)
-    console.log(err)
+    console.log('Socket connection error:', err)
 
     payIntervalId && clearInterval(payIntervalId);
     payIntervalId = null
