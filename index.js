@@ -54,7 +54,7 @@ app.get('/buy', async (req, res) => {
 
   const ifaces = await wifiService.getAllInterfaces()
   const iface = ifaces.find(i => i.name === 'wlan1')
-  createSocketClient(iface.gateway_ip)
+  createSocketClient(iface.ip_address)
   socketClient.emit('get-payment-info')
 
   state = 'buy'
