@@ -55,6 +55,7 @@ app.get('/buy', async (req, res) => {
   const ifaces = await wifiService.getAllInterfaces()
   const iface = ifaces.filter(i => i.name === 'wlan1')
 
+  console.log('Connecting to iface.ip_address', iface.ip_address)
   const socketClient = ioClient(`http://${iface.ip_address}:3000`);
   const address = await iotaService.getCurrentAddress()
   socketClient.emit('get-payment-info')
@@ -116,6 +117,7 @@ io.on('connection', function (client) {
   console.log('client connected...', client.handshake.address)
 
   client.on('get-payment-info', function (data) {
+    console.log('get-payment-info RECEIVED')
     client.emit('payment-info', {
       toAddress: address,
       price: askPrice
@@ -124,6 +126,7 @@ io.on('connection', function (client) {
 
   let payIntervalId = null;
   client.on('payment-info', function (data) {
+    console.log('payment-info RECEIVED')
     if (state !== 'sell') {
       console.log('Ignoring payment info data, Invalid state', state)
       return
