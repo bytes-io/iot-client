@@ -52,6 +52,17 @@ app.get('/buy', async (req, res) => {
   // const gatewayIp = await wifiService.connect(null, bytesAps[0].ssid, '12346789');
   // res.send({gatewayIp})
 
+  const ifaces = await wifiService.getAllInterfaces()
+  const iface = ifaces.filter(i => i.name === 'wlan1')
+
+  const socketClient = ioClient(`http://${iface.ip_address}:3000`);
+  const address = await iotaService.getCurrentAddress()
+  socketClient.emit('get-payment-info')
+  // socketClient.emit('payment-info', {
+  //   toAddress: address,
+  //   price: askPrice
+  // });
+
   state = 'buy'
   console.log('Ready to buy access')
   res.send({state})
@@ -74,13 +85,6 @@ app.get('/start-selling', async (req,res) => {
     }
   })
   state = 'sell'
-
-  const socketClient = ioClient('http://192.168.4.11:3000');
-  const address = await iotaService.getCurrentAddress()
-  socketClient.emit('payment-info', {
-    toAddress: address,
-    price: askPrice
-  });
 
   res.send({state})
 })
@@ -111,9 +115,16 @@ app.get('/wallet/data', async (req,res) => {
 io.on('connection', function (client) {
   console.log('client connected...', client.handshake.address)
 
+  client.on('get-payment-info', function (data) {
+    client.emit('payment-info', {
+      toAddress: address,
+      price: askPrice
+    });
+  })
+
   let payIntervalId = null;
   client.on('payment-info', function (data) {
-    if (state !== 'buy') {
+    if (state !== 'sell') {
       console.log('Ignoring payment info data, Invalid state', state)
       return
     }
