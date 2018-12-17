@@ -115,7 +115,7 @@ function createSocketClient(ip) {
 
   socketClient.on('payment-info', function (data) {
     console.log('payment-info RECEIVED')
-    if (state !== 'sell') {
+    if (state !== 'buy') {
       console.log('Ignoring payment info data, Invalid state', state)
       return
     }
@@ -127,6 +127,23 @@ function createSocketClient(ip) {
       console.log('Initializing payment');
       await iotaService.makeTx(paymentInfo.toAddress, 0)
     }, 1 * 10 * 1000);
+  })
+
+  socketClient.on('disconnect', function () {
+    console.log('client disconnect...', client.id)
+
+    payIntervalId && clearInterval(payIntervalId);
+    payIntervalId = null
+    socketClient = null
+  })
+  
+  socketClient.on('error', function (err) {
+    console.log('received error from client:', client.id)
+    console.log(err)
+
+    payIntervalId && clearInterval(payIntervalId);
+    payIntervalId = null
+    socketClient = null
   })
 
   return socketClient
@@ -146,17 +163,11 @@ io.on('connection', function (client) {
 
   client.on('disconnect', function () {
     console.log('client disconnect...', client.id)
-
-    payIntervalId && clearInterval(payIntervalId);
-    payIntervalId = null
   })
   
   client.on('error', function (err) {
     console.log('received error from client:', client.id)
     console.log(err)
-
-    payIntervalId && clearInterval(payIntervalId);
-    payIntervalId = null
   })
 })
 
