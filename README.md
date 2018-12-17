@@ -5,6 +5,8 @@ A simple IoT client service.
 To reduce the load the Proof Of Work is deligated to a trusted node.
 See ```services/proof-of-work.js``` for complete details.
 
+Developped on RPi3 with Raspbian Stretch. 
+
 **Bootstrap a new IoT device**
 
 ```
