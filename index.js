@@ -75,7 +75,7 @@ app.get('/start-selling', async (req,res) => {
   })
   state = 'sell'
 
-  const socketClient = ioClient('http://localhost:3001');
+  const socketClient = ioClient('http://192.168.4.11:3000');
   const address = await iotaService.getCurrentAddress()
   socketClient.emit('payment-info', {
     toAddress: address,
