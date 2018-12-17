@@ -54,14 +54,8 @@ app.get('/buy', async (req, res) => {
 
   const ifaces = await wifiService.getAllInterfaces()
   const iface = ifaces.find(i => i.name === 'wlan1')
-
-  console.log('Connecting to iface.ip_address', iface.ip_address)
-  const socketClient = ioClient(`http://${iface.ip_address}:3000`);
+  createSocketClient(iface.gateway_ip)
   socketClient.emit('get-payment-info')
-  // socketClient.emit('payment-info', {
-  //   toAddress: address,
-  //   price: askPrice
-  // });
 
   state = 'buy'
   console.log('Ready to buy access')
@@ -113,20 +107,13 @@ app.get('/wallet/data', async (req,res) => {
   res.send({accountData})
 })
 
-io.on('connection', function (client) {
-  console.log('client connected...', client.handshake.address)
+let payIntervalId = null;
+let socketClient = null
+function createSocketClient(ip) {
+  console.log('Connecting to websocket', ip)
+  socketClient = ioClient(`http://${ip}:3000`);
 
-  client.on('get-payment-info', async function (data) {
-    console.log('get-payment-info RECEIVED')
-    const address = await iotaService.getCurrentAddress()
-    client.emit('payment-info', {
-      toAddress: address,
-      price: askPrice
-    });
-  })
-
-  let payIntervalId = null;
-  client.on('payment-info', function (data) {
+  socketClient.on('payment-info', function (data) {
     console.log('payment-info RECEIVED')
     if (state !== 'sell') {
       console.log('Ignoring payment info data, Invalid state', state)
@@ -140,6 +127,21 @@ io.on('connection', function (client) {
       console.log('Initializing payment');
       await iotaService.makeTx(paymentInfo.toAddress, 0)
     }, 1 * 10 * 1000);
+  })
+
+  return socketClient
+}
+
+io.on('connection', function (client) {
+  console.log('client connected...', client.handshake.address)
+
+  client.on('get-payment-info', async function (data) {
+    console.log('get-payment-info RECEIVED')
+    const address = await iotaService.getCurrentAddress()
+    client.emit('payment-info', {
+      toAddress: address,
+      price: askPrice
+    });
   })
 
   client.on('disconnect', function () {
@@ -157,9 +159,6 @@ io.on('connection', function (client) {
     payIntervalId = null
   })
 })
-
-
-
 
 const port = process.env.PORT || 3000
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
